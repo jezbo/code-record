@@ -1,0 +1,254 @@
+//	REMOVE NULL AND WHITESPACE INSTANCES FROM A LIST c#
+
+	tagNames = tagNames.FindAll(e => !string.IsNullOrWhiteSpace(e));
+	
+--------------------------------------------------------------------------------------------------------	
+
+//SQL QUERY WITH TABLEVAR
+
+	public static string GetImpactAndGroupImpactImpactLevels()
+			{
+				return $@"
+					DECLARE @GroupsAndQuickGroups AS TABLE
+						(
+							GroupId INT NOT NULL,
+							ImpactID INT,
+							ImpactLevel INT,
+							Type VARCHAR(100)
+						)
+
+					INSERT INTO @GroupsAndQuickGroups
+					SELECT
+							ImpactGroups.Id AS GroupId,
+							ImpactImpactGroups.ImpactId AS ImpactId,
+							Impacts.ImpactLevel As ImpactLevel,
+							'Group' AS Type
+					FROM [dbo].[ImpactGroups]
+					INNER JOIN ImpactImpactGroups ON ImpactGroups.Id = ImpactImpactGroups.ImpactGroupId
+					INNER JOIN Impacts ON ImpactImpactGroups.ImpactId = Impacts.Id
+					WHERE IMPACTS.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND IMPACTS.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					UNION
+
+					SELECT
+							ImpactGroups.Id AS GroupId,
+							QuickImpactImpactGroups.QuickImpactId AS ImpactId,
+							QuickImpacts.ImpactLevel As ImpactLevel,
+							'DraftGroup' AS Type
+					FROM [dbo].[ImpactGroups]
+					INNER JOIN QuickImpactImpactGroups ON ImpactGroups.Id = QuickImpactImpactGroups.ImpactGroupId
+					INNER JOIN QuickImpacts ON QuickImpactImpactGroups.QuickImpactId = QuickImpacts.Id
+					WHERE QuickImpacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND QuickImpacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					ORDER BY GroupId
+
+					DECLARE @AveragedGroupsAndQuickGroups AS TABLE
+						(
+							GroupId INT NOT NULL,
+							ImpactID INT,
+							ImpactLevel INT,
+							Type VARCHAR(100)
+						)
+					INSERT INTO @AveragedGroupsAndQuickGroups
+					SELECT 
+						GroupId AS GroupId,
+						-1 AS ImpactId,
+						AVG(ImpactLevel) AS ImpactLevel,
+						'group' AS Type
+					FROM
+					@GroupsAndQuickGroups
+					Group By GroupId
+
+					SELECT 
+						GroupId AS Id,
+						ImpactLevel,
+						1 AS Type
+					FROM @AveragedGroupsAndQuickGroups
+
+					UNION
+
+					SELECT
+						Id AS Id,
+						ImpactLevel AS ImpactLevel,
+						'2' AS Type
+					FROM Impacts
+					WHERE Impacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND Impacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					UNION
+
+					SELECT
+						Id AS Id,
+						ImpactLevel AS ImpactLevel,
+						'3' AS Type
+					FROM QuickImpacts
+					WHERE QuickImpacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND QuickImpacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					ORDER BY GroupId
+				";
+			}
+	---------------------------------------------------------------------------------------------------------------------		
+			
+			   
+			   
+//Add line manually declaring in ID column (usually autonumber)
+
+	DECLARE @manualId int
+		BEGIN TRAN
+
+			SELECT 
+				@manualId = MAX(id) + 1 FROM dbo.OrganisationSettings WITH (UPDLOCK, HOLDLOCK)
+			--ON! Identity Insert
+			SET IDENTITY_INSERT 
+				dbo.OrganisationSettings ON;
+			INSERT INTO 
+				dbo.OrganisationSetting(
+					Id, 
+					LifeCycleStatus, 
+					SettingTypeId, 
+					Name, 
+					DefaultValue
+				)
+			VALUES (
+				@manualId, 
+				0, 
+				2, 
+				'Email Domain Whitelist', 
+				'thepub.com'
+			)
+			--OFF! Identity Insert
+			SET IDENTITY_INSERT 
+				dbo.OrganisationSettings OFF;
+
+		COMMIT TRAN
+		
+		
+		------------------------------------------------------------------------------------------------------------------------------
+		
+		if(elementPresent)
+		{
+				
+			int clickAttempts = 0;
+			while(clickAttempts < 3)
+			{
+				try
+				{
+					var optionEl = FindElement(optionSelector);
+					Wait(1);
+					optionEl.Click();
+					break;
+				} 
+				catch(StaleElementReferenceException)
+				{
+					clickAttempts++;
+				}
+			}
+			
+			return;
+			
+			}
+			
+		-----------------------------------------------------------------------------------------------------------------------------------------------
+		
+//ShowIf functional component (untested)
+
+		import React, { useEffect, useState } from "react";
+
+		interface Props {
+			conditional: any;
+		}
+
+		const ShowIf : React.FC<Props> = ({conditional, children}) => {
+
+			const[contents, setContents] = useState(null);
+			
+			const setContentsLogic = () => {
+				if(!conditional) setContents(null);
+				if(typeof children === "function") setContents(children());
+				else setContents(children);
+			};
+
+			useEffect(() => {
+				setContentsLogic();
+			}, [conditional, children])
+			return <div>{contents}</div>;
+			}
+			
+		export default ShowIf;
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+//One way to provide a system for alternation (e.g. row bg colours) 
+
+
+const PermissionsTableRows: React.FC<any> = ({ payload }) => {
+  return (
+    <>
+      {payload.map((e, i) => {
+        let isEven = true;
+        if (i % 2 !== 0) isEven = false;
+        return <TableRow project={e} isEven={isEven} />;
+      })}
+    </>
+  );
+};
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+//managing async data call in react component (useCallback because of dependencies 
+//further back down the line and remember to add dependency to useEffect)  
+
+const OrganisationUserPermissionsList: React.FC<any> = ({ getPermissionsFunction, organisationId, systemUserId }) => {
+  const [permissionsData, setPermissionsData] = useState([]);
+
+  const loadPermissionsData = useCallback(() => {
+    getPermissionsFunction(organisationId, systemUserId).then(r => setPermissionsData(r));
+  }, [getPermissionsFunction, organisationId, systemUserId]);
+
+  useEffect(() => {
+    loadPermissionsData();
+  }, [loadPermissionsData]);
+
+  return (
+    <table>
+      <Headers names={headerNames} />
+      <PermissionsTableRows payload={permissionsData} />
+    </table>
+  );
+};
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+//serialization  c#
+
+private string SerializeFilteredPermissionsList(IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> filteredList)
+        {
+            return JsonSerializer.Serialize(filteredList);
+        }
+
+-------------------------------------------------------------------------------------------------------------------------------------------------		
+		
+//deserialiazation c#
+
+ private List<FlightPath.Logic.Domain.PermissionOrganisation> DeserializeQueryResponse(
+            OrganisationUserPermissionsCache response)
+        {
+            return
+                (
+                    JsonSerializer.
+                    Deserialize<List<FlightPath.Logic.Domain.PermissionOrganisation>>(response.PermissionObject)
+                );
+
+        }
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+//sorting a list within an IENumerable c#
+
+private IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> SortProjects(
+            IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> organisations)
+        {
+
+            organisations.First().Projects = organisations.First().Projects.OrderBy(p => p.Name).ToList();
+            return organisations;
+        }
