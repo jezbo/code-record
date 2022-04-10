@@ -1,0 +1,14 @@
+//One way to provide a system for alternation (e.g. row bg colours) 
+
+
+const PermissionsTableRows: React.FC<any> = ({ payload }) => {
+  return (
+    <>
+      {payload.map((e, i) => {
+        let isEven = true;
+        if (i % 2 !== 0) isEven = false;
+        return <TableRow project={e} isEven={isEven} />;
+      })}
+    </>
+  );
+};
