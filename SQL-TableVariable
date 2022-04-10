@@ -1,0 +1,86 @@
+//SQL QUERY WITH TABLEVAR
+
+	public static string GetImpactAndGroupImpactImpactLevels()
+			{
+				return $@"
+					DECLARE @GroupsAndQuickGroups AS TABLE
+						(
+							GroupId INT NOT NULL,
+							ImpactID INT,
+							ImpactLevel INT,
+							Type VARCHAR(100)
+						)
+
+					INSERT INTO @GroupsAndQuickGroups
+					SELECT
+							ImpactGroups.Id AS GroupId,
+							ImpactImpactGroups.ImpactId AS ImpactId,
+							Impacts.ImpactLevel As ImpactLevel,
+							'Group' AS Type
+					FROM [dbo].[ImpactGroups]
+					INNER JOIN ImpactImpactGroups ON ImpactGroups.Id = ImpactImpactGroups.ImpactGroupId
+					INNER JOIN Impacts ON ImpactImpactGroups.ImpactId = Impacts.Id
+					WHERE IMPACTS.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND IMPACTS.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					UNION
+
+					SELECT
+							ImpactGroups.Id AS GroupId,
+							QuickImpactImpactGroups.QuickImpactId AS ImpactId,
+							QuickImpacts.ImpactLevel As ImpactLevel,
+							'DraftGroup' AS Type
+					FROM [dbo].[ImpactGroups]
+					INNER JOIN QuickImpactImpactGroups ON ImpactGroups.Id = QuickImpactImpactGroups.ImpactGroupId
+					INNER JOIN QuickImpacts ON QuickImpactImpactGroups.QuickImpactId = QuickImpacts.Id
+					WHERE QuickImpacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND QuickImpacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					ORDER BY GroupId
+
+					DECLARE @AveragedGroupsAndQuickGroups AS TABLE
+						(
+							GroupId INT NOT NULL,
+							ImpactID INT,
+							ImpactLevel INT,
+							Type VARCHAR(100)
+						)
+					INSERT INTO @AveragedGroupsAndQuickGroups
+					SELECT 
+						GroupId AS GroupId,
+						-1 AS ImpactId,
+						AVG(ImpactLevel) AS ImpactLevel,
+						'group' AS Type
+					FROM
+					@GroupsAndQuickGroups
+					Group By GroupId
+
+					SELECT 
+						GroupId AS Id,
+						ImpactLevel,
+						1 AS Type
+					FROM @AveragedGroupsAndQuickGroups
+
+					UNION
+
+					SELECT
+						Id AS Id,
+						ImpactLevel AS ImpactLevel,
+						'2' AS Type
+					FROM Impacts
+					WHERE Impacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND Impacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					UNION
+
+					SELECT
+						Id AS Id,
+						ImpactLevel AS ImpactLevel,
+						'3' AS Type
+					FROM QuickImpacts
+					WHERE QuickImpacts.ProjectId = {ParameterConstants.PROJECT_ID} 
+					AND QuickImpacts.lifecyclestatus= {LifecycleStatus.Active.ToInt()}
+
+					ORDER BY GroupId
+				";
+			}
