@@ -1,0 +1,22 @@
+if(elementPresent)
+		{
+				
+			int clickAttempts = 0;
+			while(clickAttempts < 3)
+			{
+				try
+				{
+					var optionEl = FindElement(optionSelector);
+					Wait(1);
+					optionEl.Click();
+					break;
+				} 
+				catch(StaleElementReferenceException)
+				{
+					clickAttempts++;
+				}
+			}
+			
+			return;
+			
+			}
