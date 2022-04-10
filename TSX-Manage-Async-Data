@@ -1,0 +1,21 @@
+//managing async data call in react component (useCallback because of dependencies 
+//further back down the line and remember to add dependency to useEffect)  
+
+const OrganisationUserPermissionsList: React.FC<any> = ({ getPermissionsFunction, organisationId, systemUserId }) => {
+  const [permissionsData, setPermissionsData] = useState([]);
+
+  const loadPermissionsData = useCallback(() => {
+    getPermissionsFunction(organisationId, systemUserId).then(r => setPermissionsData(r));
+  }, [getPermissionsFunction, organisationId, systemUserId]);
+
+  useEffect(() => {
+    loadPermissionsData();
+  }, [loadPermissionsData]);
+
+  return (
+    <table>
+      <Headers names={headerNames} />
+      <PermissionsTableRows payload={permissionsData} />
+    </table>
+  );
+};
