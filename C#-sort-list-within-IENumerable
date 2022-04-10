@@ -1,0 +1,8 @@
+//sorting a list within an IENumerable c#
+
+private IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> SortProjects(
+            IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> organisations)
+        {
+            organisations.First().Projects = organisations.First().Projects.OrderBy(p => p.Name).ToList();
+            return organisations;
+        }
