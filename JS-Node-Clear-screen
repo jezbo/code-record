@@ -1,0 +1,12 @@
+if(!exit) {
+    const retryCallback = () => {
+        replay = retryPrompt();
+        if(!replay)  exit=true;
+        clearTimeout(retryTimeout);
+        retryTimeout = {};
+        if(!exit) loop();
+        else if(exit) {
+            process.stdout.cursorTo(0,0)
+            process.stdout.clearScreenDown();
+        }
+    };
