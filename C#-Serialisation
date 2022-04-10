@@ -1,0 +1,4 @@
+private string SerializeFilteredPermissionsList(IEnumerable<FlightPath.Logic.Domain.PermissionOrganisation> filteredList)
+        {
+            return JsonSerializer.Serialize(filteredList);
+        }
