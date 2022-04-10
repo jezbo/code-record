@@ -1,0 +1,30 @@
+//Add line manually declaring in ID column (usually autonumber)
+
+	DECLARE @manualId int
+		BEGIN TRAN
+
+			SELECT 
+				@manualId = MAX(id) + 1 FROM dbo.OrganisationSettings WITH (UPDLOCK, HOLDLOCK)
+			--ON! Identity Insert
+			SET IDENTITY_INSERT 
+				dbo.OrganisationSettings ON;
+			INSERT INTO 
+				dbo.OrganisationSetting(
+					Id, 
+					LifeCycleStatus, 
+					SettingTypeId, 
+					Name, 
+					DefaultValue
+				)
+			VALUES (
+				@manualId, 
+				0, 
+				2, 
+				'Email Domain Whitelist', 
+				'thepub.com'
+			)
+			--OFF! Identity Insert
+			SET IDENTITY_INSERT 
+				dbo.OrganisationSettings OFF;
+
+		COMMIT TRAN
