@@ -1,0 +1,6 @@
+const findMapSize = (mapArray) => {
+        return {
+            y:mapArray.length,
+            x:mapArray.map(e => e.length)
+        };
+    }
