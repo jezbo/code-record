@@ -1,0 +1,10 @@
+ private List<FlightPath.Logic.Domain.PermissionOrganisation> DeserializeQueryResponse(
+            OrganisationUserPermissionsCache response)
+        {
+            return
+                (
+                    JsonSerializer.
+                    Deserialize<List<FlightPath.Logic.Domain.PermissionOrganisation>>(response.PermissionObject)
+                );
+
+        }
