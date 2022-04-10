@@ -1,0 +1,26 @@
+		
+//ShowIf functional component (not fully tested)
+
+		import React, { useEffect, useState } from "react";
+
+		interface Props {
+			conditional: any;
+		}
+
+		const ShowIf : React.FC<Props> = ({conditional, children}) => {
+
+			const[contents, setContents] = useState(null);
+			
+			const setContentsLogic = () => {
+				if(!conditional) setContents(null);
+				if(typeof children === "function") setContents(children());
+				else setContents(children);
+			};
+
+			useEffect(() => {
+				setContentsLogic();
+			}, [conditional, children])
+			return <div>{contents}</div>;
+			}
+			
+		export default ShowIf;
