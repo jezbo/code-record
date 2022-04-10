@@ -1,0 +1,25 @@
+//Put numbers on the clock 
+const numbers = [];
+const inputNos = () => { //input numbers 1 -12 to array
+    for(let i=0; i<12; i++) {
+    numbers.push(i+1);
+    }
+}
+inputNos()
+console.log(numbers);
+
+const createNos = () => { //input numbers to HTML as <p>
+    numbers.forEach(element => {
+        let newElement = document.createElement("p");
+        newElement.id = element;
+        newElement.innerHTML = element;
+        document.getElementById("number-container").appendChild(newElement);
+        let degs = element * 30;
+        let degToRad = degs * (Math.PI)/180 //180 degrees = PI radians;
+        let x = 100 * (Math.sin(degToRad) + 1); //x coordinate (width is 0 to 200%)
+        let y = (-50 * Math.cos(degToRad)) + 50; //y coordinate (top is 0 to 100%)
+        newElement.style.width = x + '%'; 
+        newElement.style.top = y + '%';
+    });
+}
+createNos();
