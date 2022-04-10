@@ -1,0 +1,4 @@
+//	REMOVE NULL AND WHITESPACE INSTANCES FROM A LIST c#
+
+	tagNames = tagNames.FindAll(e => !string.IsNullOrWhiteSpace(e));
+	
