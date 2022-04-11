@@ -1,0 +1,17 @@
+ <div className={`project-mega-menu d-flex flex-row flex-wrap`}>
+      {_.map(projects, e => {
+        const url = `/organisations/${organisationId}/projects/${e.id}`;
+        return (
+          <div key={e.id} className="project-mega-menu__item mb-1">
+            <ProjectNavElement
+              key={`project-${e.id}`}
+              url={url}
+              name={e.name}
+              hasImpactsAccess={e.impact.canView}
+              hasActionsAccess={e.action.canView}
+              hasStakeholdersAccess={e.stakeholder.canView}
+            />
+          </div>
+        );
+      })}
+    </div>
