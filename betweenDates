@@ -1,0 +1,11 @@
+(
+			(year(i.StartDate) = 2022 and month(i.startdate) >= 6) 
+			or 
+			(year(i.startDate) > 2022)
+		)
+		and
+		(
+			(year(i.ActualEndDate) =2022 and month(i.ActualEndDate) <= 6)
+			or
+			(year(i.ActualEndDate) < 2022)
+)
