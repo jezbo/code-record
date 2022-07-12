@@ -1,0 +1,7 @@
+const getYearSelection = () => {
+			let years: number[] = [year]
+			for (let i = 1; i < 6; i++) {
+				years.unshift(year - i);
+				years.push(year + i);
+			}
+		}
