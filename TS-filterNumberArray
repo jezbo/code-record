@@ -1,0 +1,88 @@
+const filterOutliers = (impactCounts: number[]) => {
+
+  let array = cleanData(impactCounts);
+  if (isInsufficientData(array)) return adjustedRange(array);
+
+  if (array.length < 4) return getRangeArray(array);
+
+  const quartileOne = getQuartileOne(array);
+  const quartileThree = getQuartileThree(array);
+  const interquartileRange = getInterquartileRange(quartileOne, quartileThree);
+  const outlierSensitivity = 1.5;
+
+  const maxValue = quartileThree + interquartileRange * outlierSensitivity;
+  const minValue = quartileOne - interquartileRange * outlierSensitivity;
+  const result = array.filter(e => e >= minValue && e <= maxValue);
+  return result;
+}
+
+const removeZeros = (impactCounts: number[]) => {
+  return impactCounts.filter(e => e > 0);
+}
+
+const isInsufficientData = (array: number[]) => {
+  return (
+    isEmpty(array)
+    ||
+    firstElementEqualsLast(array)
+    ||
+    hasOneElement(array)
+  )
+}
+
+const isEmpty = (array: number[]) => {
+  return array.length === 0;
+}
+
+const hasOneElement = (array: number[]) => {
+  return array.length === 1;
+}
+
+const firstElementEqualsLast = (array: number[]) => {
+  return array[0] === array[array.length - 1];
+}
+
+const adjustedRange = (array: number[], adjustment: number = 1) => {
+  const lastElementIndex = array.length - 1;
+  if (array.length === 0) return [1, 2];
+  if (array.length > 1) array[lastElementIndex] += adjustment;
+  else if (array.length === 1) array.push(array[0] + adjustment);
+  return getRangeArray(array);
+}
+
+const removeOddIndex = (impactCounts: number[]) => {
+  const middleIndex = Math.ceil(impactCounts.length / 2) - 1;
+  impactCounts.splice(middleIndex, 1);
+  return impactCounts;
+}
+
+const cleanData = (impactCounts: number[]) => {
+  let result = removeZeros(impactCounts);
+  result.sort((a, b) => { return a - b });
+  if (result.length % 2 > 0) result = removeOddIndex(result);
+  return result;
+}
+
+const getRangeArray = (array: number[]) => {
+  const firstElement = array[0];
+  const lastElement = array[array.length - 1];
+  return [firstElement, lastElement];
+}
+
+const getQuartileOne = (array: number[]) => {
+  const firstHalf = array.slice(0, (array.length / 2) - 1);
+  if (firstHalf.length % 2 > 0) removeOddIndex(firstHalf);
+  const quartileIndex = firstHalf.length / 2 - 1;
+  return firstHalf[quartileIndex];
+}
+
+const getQuartileThree = (array: number[]) => {
+  const secondHalf = array.slice((array.length / 2));
+  if (secondHalf.length % 2 > 0) removeOddIndex(secondHalf);
+  const quartileIndex = (secondHalf.length / 2 - 1) - 1
+  return secondHalf[quartileIndex];
+}
+
+const getInterquartileRange = (q1, q3) => {
+  return q3 - q1;
+}
