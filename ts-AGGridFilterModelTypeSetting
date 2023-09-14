@@ -1,0 +1,31 @@
+interface IBaseGridFilter {
+    filterType?: string;
+    type?: string;
+}
+
+interface IDateGridFilter extends IBaseGridFilter {
+    kind: "date";
+    dateFrom?: string;
+    dateTo?: string;
+}
+
+interface IStringAndNumberGridFilter extends IBaseGridFilter {
+    kind: "stringOrNumber";
+    filter: string;
+}
+
+type IGridFilter = IDateGridFilter | IStringAndNumberGridFilter;
+
+interface IOperatorGridFilter extends IBaseGridFilter{
+    kind: "operator"
+    operator: string;
+    condition1: IGridFilter;
+    condition2: IGridFilter;
+    conditions: IGridFilter[];
+}
+
+type IColumnFilter = IGridFilter | IOperatorGridFilter;
+
+interface IFilterModel {
+    [key: string]: IColumnFilter;
+}
