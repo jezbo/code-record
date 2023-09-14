@@ -1,0 +1,43 @@
+public abstract class BaseGridFilter
+{
+    public string FilterType { get; set; }
+    public string Type { get; set; }
+}
+
+public class DateGridFilter : BaseGridFilter
+{
+    public string Kind { get; } = "date";
+    public string DateFrom { get; set; }
+    public string DateTo { get; set; }
+}
+
+public class StringAndNumberGridFilter : BaseGridFilter
+{
+    public string Kind { get; } = "stringOrNumber";
+    public string Filter { get; set; }
+}
+
+public abstract class GridFilter : BaseGridFilter
+{
+    // This class can be empty and is used as a base class for DateGridFilter and StringAndNumberGridFilter
+}
+
+public class OperatorGridFilter : BaseGridFilter
+{
+    public string Kind { get; } = "operator";
+    public string Operator { get; set; }
+    public GridFilter Condition1 { get; set; }
+    public GridFilter Condition2 { get; set; }
+    public List<GridFilter> Conditions { get; set; }
+}
+
+public class ColumnFilter
+{
+    // This should be a GridFilter or an OperatorGridFilter, so its type should be BaseGridFilter
+    public BaseGridFilter Filter { get; set; }
+}
+
+public class GridFilterModel
+{
+    public Dictionary<string, ColumnFilter> Filters {  get; set; }
+}
