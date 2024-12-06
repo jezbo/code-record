@@ -1,0 +1,96 @@
+public class ByteArrayMagicNumberHelper
+{
+
+    //in the codebase this enum would not be stored here
+    public enum MediaType
+    {
+        Image,
+        Other
+    }
+
+    public static MediaType GetMediaTypeByMagicNumbers(byte[] fileData)
+    {
+        if(IsImage(fileData) return MediaType.Image;
+        return MediaType.Other;
+    }
+
+
+    private static bool IsImage(byte[] fileData)
+    {
+        return (
+            IsJpeg(fileData)
+            ||
+            IsGif(fileData)
+            ||
+            IsPng(fileData)
+            ||
+            IsSvg(fileData)
+        );
+    }
+
+    private static bool IsGif(byte[] fileData)
+    {
+        byte[] gif87aMagicNumberBeginning = new byte[] { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 };
+        byte[] gif89aMagicNumberBeginning = new byte[] { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 };
+        for (int i = 0; i < gif87aMagicNumberBeginning.Length; i++)
+        {
+            if (
+                fileData[i] != gif87aMagicNumberBeginning[i]
+                &&
+                fileData[i] != gif89aMagicNumberBeginning[i]
+            ) return false;
+        }
+        return true;
+    }
+
+    private static bool IsJpeg(byte[] fileData)
+    {
+        return (
+            FileByteArrayBeginsAsJpeg(fileData)
+            &&
+            FileByteArrayEndsAsJpeg(fileData)
+        );
+    }
+
+    private static bool FileByteArrayBeginsAsJpeg(byte[] fileData)
+    {
+        byte[] JpegMagicNumberBeginning = new byte[] { 0xFF, 0xD8, 0xFF };
+
+        for (int i = 0; i < JpegMagicNumberBeginning.Length; i++)
+        {
+            if (fileData[i] != JpegMagicNumberBeginning[i]) return false;
+        }
+        return true;
+    }
+
+    private static bool FileByteArrayEndsAsJpeg(byte[] fileData)
+    {
+        byte[] JpegMagicNumberEnd = new byte[] { 0xFF, 0xD9 };
+        int loopStartingIndex = fileData.Length - JpegMagicNumberEnd.Length;
+        for (int i = 0; i < JpegMagicNumberEnd.Length; i++)
+        {
+            if (fileData[loopStartingIndex + i] != JpegMagicNumberEnd[i]) return false;
+        }
+        return true;
+    }
+
+    private static bool IsPng(byte[] fileData)
+    {
+        byte[] pngMagicNumberBeginning = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        for (int i = 0; i < pngMagicNumberBeginning.Length; i++)
+        {
+            if (fileData[i] != pngMagicNumberBeginning[i]) return false;
+        }
+        return true;
+    }
+
+    private static bool IsSvg(byte[] fileData)
+    {
+        byte[] svgMagicNumberBeginning = new byte[] { 0x3C, 0x73, 0x76, 0x67 };
+        for (int i = 0; i < svgMagicNumberBeginning.Length; i++)
+        {
+            if (fileData[i] != svgMagicNumberBeginning[i]) return false;
+        }
+        return true;
+    }
+}
